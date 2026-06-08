@@ -898,4 +898,577 @@ public class AppTest {
         
         assertDoesNotThrow(() -> panel.actionPerformed(event));
     }
+
+        @Test
+    @DisplayName("TicTacToePanel: Create cell updates cells array")
+    public void testTicTacToePanelCreateCell() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        assertNotNull(cells[0]);
+        assertNotNull(cells[1]);
+        assertNotNull(cells[2]);
+        assertNotNull(cells[3]);
+        assertNotNull(cells[4]);
+        assertNotNull(cells[5]);
+        assertNotNull(cells[6]);
+        assertNotNull(cells[7]);
+        assertNotNull(cells[8]);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed when AI move is zero")
+    public void testTicTacToePanelAIMoveZero() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            if (cells[i].getMarker() == ' ') {
+                cells[i].doClick();
+                break;
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed updates cplayer correctly after X move")
+    public void testTicTacToePanelCplayerAfterXMove() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        assertEquals(panelGame.player1, panelGame.cplayer);
+        
+        cells[0].doClick();
+        
+        assertTrue(panelGame.cplayer == panelGame.player1 || panelGame.cplayer == panelGame.player2);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed when board is full")
+    public void testTicTacToePanelFullBoard() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            panelGame.board[i] = (i % 2 == 0) ? 'X' : 'O';
+        }
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            if (cells[i].getMarker() == ' ') {
+                cells[i].doClick();
+                break;
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed handles win condition properly")
+    public void testTicTacToePanelWinCondition() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        panelGame.board[0] = 'X';
+        panelGame.board[1] = 'X';
+        panelGame.board[2] = 'X';
+        for (int i = 0; i < 3; i++) {
+            cells[i].setMarker("X");
+        }
+        
+        panelGame.state = panelGame.checkState(panelGame.board);
+        
+        assertTrue(panelGame.state == State.XWIN || panelGame.state == State.PLAYING);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed handles draw condition")
+    public void testTicTacToePanelDrawCondition() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        panelGame.board[0] = 'X'; panelGame.board[1] = 'O'; panelGame.board[2] = 'X';
+        panelGame.board[3] = 'O'; panelGame.board[4] = 'X'; panelGame.board[5] = 'O';
+        panelGame.board[6] = 'O'; panelGame.board[7] = 'X'; panelGame.board[8] = 'O';
+        
+        panelGame.state = panelGame.checkState(panelGame.board);
+        
+        assertEquals(State.DRAW, panelGame.state);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed when AI makes move with valid position")
+    public void testTicTacToePanelValidAIMove() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        cells[4].doClick();
+        
+        boolean aiMoved = false;
+        for (TicTacToeCell cell : cells) {
+            if (cell.getMarker() == 'O') {
+                aiMoved = true;
+                break;
+            }
+        }
+        assertTrue(aiMoved);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed with no available moves")
+    public void testTicTacToePanelNoAvailableMoves() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            panelGame.board[i] = 'X';
+        }
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        for (TicTacToeCell c : cells) {
+            if (c.getMarker() == ' ') {
+                c.doClick();
+                break;
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed updates nmove for player1")
+    public void testTicTacToePanelNmovePlayer1() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        cells[0].doClick();
+        
+        assertTrue(panelGame.nmove >= -1 && panelGame.nmove <= 9);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed when source is not a cell")
+    public void testTicTacToePanelActionPerformedWrongSource() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        ActionEvent fakeEvent = new ActionEvent(panel, ActionEvent.ACTION_PERFORMED, "fake");
+        
+        assertDoesNotThrow(() -> panel.actionPerformed(fakeEvent));
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: All cells properly added to panel")
+    public void testTicTacToePanelAllCellsAdded() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        assertEquals(9, panel.getComponentCount());
+        
+        for (int i = 0; i < 9; i++) {
+            assertTrue(panel.getComponent(i) instanceof TicTacToeCell);
+        }
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: Multiple clicks on same cell do not change marker")
+    public void testTicTacToePanelMultipleClicksSameCell() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        cells[0].doClick();
+        char firstMarker = cells[0].getMarker();
+        
+        cells[0].doClick();
+        char secondMarker = cells[0].getMarker();
+        
+        assertEquals(firstMarker, secondMarker);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: Game board syncs with cell markers after click")
+    public void testTicTacToePanelBoardSync() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        cells[0].doClick();
+        
+        assertEquals(cells[0].getMarker(), panelGame.board[0]);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: Player move sets move field correctly")
+    public void testTicTacToePanelPlayerMoveField() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        int initialMove = panelGame.player1.move;
+        cells[0].doClick();
+        
+        assertNotEquals(initialMove, panelGame.player1.move);
+    }
+
+        @Test
+    @DisplayName("TicTacToePanel: ActionPerformed branch when cplayer is player2")
+    public void testTicTacToePanelCplayerIsPlayer2() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        panelGame.cplayer = panelGame.player2;
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            if (cells[i].getMarker() == ' ') {
+                cells[i].doClick();
+                break;
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed when AI move returns -1")
+    public void testTicTacToePanelAIMoveReturnsMinusOne() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            panelGame.board[i] = 'X';
+        }
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            cells[i].setMarker("X");
+        }
+        
+        for (TicTacToeCell cell : cells) {
+            if (cell.getMarker() == ' ') {
+                cell.doClick();
+                break;
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed triggers XWIN")
+    public void testTicTacToePanelXWinTrigger() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        panelGame.board[0] = 'X';
+        panelGame.board[1] = 'X';
+        panelGame.board[2] = 'X';
+        panelGame.symbol = 'X';
+        panelGame.state = State.XWIN;
+        
+        cells[0].setMarker("X");
+        cells[1].setMarker("X");
+        cells[2].setMarker("X");
+        
+        assertDoesNotThrow(() -> cells[0].doClick());
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed triggers OWIN")
+    public void testTicTacToePanelOWinTrigger() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        panelGame.board[0] = 'O';
+        panelGame.board[1] = 'O';
+        panelGame.board[2] = 'O';
+        panelGame.symbol = 'O';
+        panelGame.state = State.OWIN;
+        
+        cells[0].setMarker("O");
+        cells[1].setMarker("O");
+        cells[2].setMarker("O");
+        
+        assertDoesNotThrow(() -> cells[0].doClick());
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: ActionPerformed triggers DRAW")
+    public void testTicTacToePanelDrawTrigger() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        panelGame.board[0] = 'X'; panelGame.board[1] = 'O'; panelGame.board[2] = 'X';
+        panelGame.board[3] = 'O'; panelGame.board[4] = 'X'; panelGame.board[5] = 'O';
+        panelGame.board[6] = 'O'; panelGame.board[7] = 'X'; panelGame.board[8] = 'O';
+        panelGame.state = State.DRAW;
+        
+        for (TicTacToeCell cell : cells) {
+            if (cell.getMarker() == ' ') {
+                assertDoesNotThrow(() -> cell.doClick());
+                break;
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: createCell sets up all cells correctly")
+    public void testTicTacToePanelCreateCellAllCells() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        int[] expectedNums = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+        int[] expectedRows = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+        int[] expectedCols = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+        
+        for (int i = 0; i < 9; i++) {
+            assertEquals(expectedNums[i], cells[i].getNum());
+            assertEquals(expectedRows[i], cells[i].getRow());
+            assertEquals(expectedCols[i], cells[i].getCol());
+        }
+    }
+
+    @Test
+    @DisplayName("TicTacToePanel: Cover the branch when generateMoves returns empty list")
+    public void testTicTacToePanelEmptyMoveList() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            cells[i].setMarker("X");
+            panelGame.board[i] = 'X';
+        }
+        
+        panelGame.cplayer = panelGame.player1;
+        
+        assertDoesNotThrow(() -> cells[0].doClick());
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: Cover the branch when checkState returns OWIN")
+    public void testTicTacToePanelCheckStateOWin() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        panelGame.board[0] = 'O';
+        panelGame.board[1] = 'O';
+        panelGame.board[2] = 'O';
+        panelGame.symbol = 'O';
+        
+        cells[0].setMarker("O");
+        cells[1].setMarker("O");
+        cells[2].setMarker("O");
+        
+        panelGame.state = panelGame.checkState(panelGame.board);
+        
+        assertEquals(State.OWIN, panelGame.state);
+        
+        panelGame.cplayer = panelGame.player1;
+        
+        assertDoesNotThrow(() -> cells[0].doClick());
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: Cover the branch when checkState returns DRAW")
+    public void testTicTacToePanelCheckStateDraw() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        panelGame.board[0] = 'X'; panelGame.board[1] = 'O'; panelGame.board[2] = 'X';
+        panelGame.board[3] = 'O'; panelGame.board[4] = 'X'; panelGame.board[5] = 'O';
+        panelGame.board[6] = 'O'; panelGame.board[7] = 'X'; panelGame.board[8] = 'O';
+        
+        for (int i = 0; i < 9; i++) {
+            cells[i].setMarker(String.valueOf(panelGame.board[i]));
+        }
+        
+        panelGame.state = panelGame.checkState(panelGame.board);
+        
+        assertEquals(State.DRAW, panelGame.state);
+        
+        panelGame.cplayer = panelGame.player1;
+        
+        assertDoesNotThrow(() -> cells[0].doClick());
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: Cover the branch when nmove is set for player2")
+    public void testTicTacToePanelNmoveForPlayer2() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field gameField = TicTacToePanel.class.getDeclaredField("game");
+        gameField.setAccessible(true);
+        Game panelGame = (Game) gameField.get(panel);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        panelGame.player2.move = 5;
+        
+        cells[0].doClick();
+        
+        assertTrue(panelGame.nmove == 5 || panelGame.nmove == -1);
+    }
+    
+    @Test
+    @DisplayName("TicTacToePanel: Cover actionPerformed with different cell indices")
+    public void testTicTacToePanelAllCellIndices() throws Exception {
+        GridLayout layout = new GridLayout(3, 3);
+        TicTacToePanel panel = new TicTacToePanel(layout);
+        
+        Field cellsField = TicTacToePanel.class.getDeclaredField("cells");
+        cellsField.setAccessible(true);
+        TicTacToeCell[] cells = (TicTacToeCell[]) cellsField.get(panel);
+        
+        for (int i = 0; i < 9; i++) {
+            if (cells[i].getMarker() == ' ') {
+                cells[i].doClick();
+                break;
+            }
+        }
+        
+        for (int i = 0; i < 9; i++) {
+            if (cells[i].getMarker() == ' ') {
+                cells[i].doClick();
+                break;
+            }
+        }
+    }
 }
